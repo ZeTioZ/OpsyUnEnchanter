@@ -1,0 +1,61 @@
+## -- When you see a '- "TEXT"' format, it means that's a list! -- ##
+## -- Please, use that format to add/remove a line from the message! -- ##
+
+## -- To print a " in the messages, be sure to escape it with \ before it, -- #
+## -- Or replace the double quotes by simple quotes like so: 'My text "1"'. -- ##
+
+## -- Placeholders are not supported. The only placeholders supported are those already in the messages. -- ##
+
+prefix: "&2[&aUnEnchanter&2] "
+
+## -- It would be ridiculous to modify that but do what you want -- ##
+
+help:
+  - "&d/ds &c» &2show infos about the plugin"
+  - "&d/ds give &c» &2Give you an unlock-scroll and an anvil"
+  - "&d/ds help &c» &2show this help page"
+  - "&d/ds reload &c» &2reload the whole plugin"
+
+weapon-unlocked:
+  - "&2You unlocked your equipment!"
+  - "&2You can now unenchant it more!"
+
+plugin-reloaded:
+  - "&aPlugin reloaded successfully!"
+
+errors:
+  must-be-block-under:
+    - "&cThere must be a block under the special anvil to place it!"
+  cant-be-sand-or-gravel-or-plant:
+    - "&cYou can't place this anvil on gravel, sand or plant. It's too heavy for it!"
+  cant-break-under-block:
+    - "&cYou can't break a block under a special anvil!"
+  locked-weapon:
+    - "&cYour weapon is locked! You can't unenchant it more!"
+    - "&cTo unlock the weapon use an &2\"&eUnlocking Scroll&2\"!"
+  no-enchants-to-recover:
+    - "&cNo enchantments to recovers from this item!"
+  no-item-hold:
+    - "&cYou have to hold an item to use the UnEnchanter!"
+  no-enchants-selected:
+    - "&cYou haven't selected any enchantment..."
+    - "&cPlease, choose an enchantment by clicking on an emerald..."
+  not-enough-XP:
+    - "&cYou don't have enough xp to get thoses enchantments"
+    - "&cYou need &2{price} XP &cto get them."
+    - "&cUse &c\"&a/xp&2\" &cto see your actual xp amount."
+  already-selected-max-enchants:
+    - "&cYou already selected the maximum amount of enchantments!"
+  unenchantment-aborted:
+    - "&cYou abortede the unenchantment!"
+  invalid-world-listed:
+    - "&cThe world {world} doesn't exist! Please, remove it from the config!"
+  invalid-drop-rate:
+    - "&cThe maximum drop percentage is 100% and it must be higher than 0%!"
+  invalid-drop-mobs:
+    - "&cThe mob {mob} that you added to the mobs drop list is invalid!"
+  unknown-command:
+    - "&cUnknown desenchant command!"
+    - "&cPlease use \"/desench help\" to know all the available commands."
+  not-enought-permissions:
+    - "&cSorry, you don't have enought permissions to do that!"

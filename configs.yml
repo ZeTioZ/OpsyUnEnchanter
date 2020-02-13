@@ -1,0 +1,140 @@
+## -- When you see a '- "TEXT"' format, it means that's a list! -- ##
+## -- Please, use that format to add/remove a line from the message! -- ##
+
+# -- Plugin Variables -- #
+## -- Define if wether or not the player has to have the permission "opsyunenchanter.use" to use a special anvil -- ##
+use-permission: false
+
+## -- Define if wether or not the player has to have the permission "opsyunenchanter.place" to place a special anvil -- ##
+place-permission: false
+
+## -- Define if wether or not the player has to have the permission "opsyunenchanter.break" to break a special anvil -- ##
+break-permission: false
+
+## -- Define if wether or not the special anvil can be exploded with explosives-- ##
+can-be-exploded: true
+
+## -- This is the limit of enchantments that a player can select when his equipment has less than 5 enchantments. Don't go above 4 ! (it will be stuck at 4 anyways) -- ##
+enchants-select-max: 2
+
+## -- This is the base price for the first catalyzer level -- ##
+catalyzer-base-price: 300
+
+## -- This is the price multiplier for each level added to the catalyzer -- ##
+catalyzer-level-multiplier: 1
+
+## -- Lock or not the weapon after an unenchantment (disable also the drop of the unlock scroll) -- ##
+weapon-lock: true
+
+## -- Define if wether or not the mobs should drop an unlocking scroll at their death -- ##
+## -- If the "weapon-lock" is set to "false" then this will be ignored and be set to false aswell -- ##
+mob-drop: true
+
+## -- List of all world where the player can drop an unlock-scroll if the drop is enabled -- ##
+activated-world-drop:
+  - "Opsycraftia"
+  - "Opsycraftia_nether"
+  - "Opsycraftia_the_end"
+
+## -- The drop rate is expressed in percents! So, 10 = 10% of drop rate! The maximum is 100%! -- ##
+drop-rate: 10
+
+## -- You can find all the entity types there => https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html -- ##
+## -- Only work if "mob-drop" and "weapon-lock" are set to true! -- ##
+drop-mobs:
+  - "ZOMBIE"
+  - "SKELETON"
+  - "ENDERMAN"
+  - "SILVERFISH"
+  - "SPIDER"
+  - "CAVE_SPIDER"
+  - "WOLF"
+  - "GHAST"
+  - "PIG_ZOMBIE"
+  - "GUARDIAN"
+  - "ENDER_DRAGON"
+  - "MAGMA_CUBE"
+  - "BLAZE"
+  - "SLIME"
+  - "WITCH"
+  - "PLAYER"
+
+# -- Plugin Sounds -- #
+## -- You can find all the sounds types there => https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html -- ##
+sounds:
+  anvil-close-sound: 'WITHER_HURT'
+  anvil-break-sound: 'ANVIL_BREAK'
+  not-enough-xp-sound: 'GHAST_SCREAM'
+  unenchantment-done-sound: 'LEVEL_UP'
+  first-interface:
+    accept-click-sound: 'CLICK'
+    refuse-click-sound: 'CLICK'
+  less-5-interface:
+    select-enchant-sound: 'NOTE_PLING'
+    unselect-enchant-sound: 'BAT_DEATH'
+    already-max-enchants-sound: 'PIG_DEATH'
+  more-5-interface:
+    increment-catalyzer-level-sound: 'NOTE_PLING'
+    decrement-catalyzer-level-sound: 'NOTE_PLING'
+
+# -- Interfaces Language -- #
+first-interface:
+  name: "&2Accept the unenchantment ?"
+  accept-button-name: "&aAccept"
+  refuse-button-name: "&cRefuse"
+  more-5-button-lore:
+    - "&dYou have 5 or more enchantments"
+    - "&dYou'll randomly get enchantments"
+    - "&d(Max 4 with the upgraded catalyzer)"
+  less-5-button-lore:
+    - "&dYou have less than 5 enchantments"
+    - "&dYou'll be able to choose"
+    - "&dThe enchantments to keep"
+    - "&d(Maximum of 2 enchantments)"
+
+less-5-interface:
+  name: "&2Choose your enchantments..."
+  enchantment-nbr-prefix: "&2ENCHANTMENT "
+  enchantment-selected-name: "&2Enchantment Selected"
+  enchantment-price-lore:
+    - "&dPrice: &c{price} XP"
+
+more-5-interface:
+  name: "&2Upgrade the catalyzer..."
+  catalyzer-name: "&2Enchantment(s) to keep..."
+  price-lore:
+    - "&dPrice: &c{price} XP"
+
+# -- Blocked Item Lore --#
+locked-item-lore: "&4LOCKED"
+
+# -- Special Anvil Item Stack -- #
+  ## -- Material needs to be a valid material ! -- ##
+  ## -- You can find all the materials here => https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html -- ##
+items:
+  ## -- Define if wether or not you want to be able to craft the special anvil -- ##
+  craft-special-anvil: true
+  
+  special-anvil:
+    name: "&2UnEnchanter"
+    lore:
+      - "&d&oUnEnchanter of equipments"
+      - "&d&oAllow you to unenchant equipments"
+      - "&d&o==========================="
+      - "&d&oFor more infos about the plugin"
+      - '&d&oUse &2"&a/desench info&2"'
+      - "&d&o==========================="
+  
+  ## -- Define if wether or not you want to be able to craft the unlock scroll -- ##
+  craft-unlock-scroll: true
+  
+  unlock-scroll:
+    material: "PAPER"
+    name: "Unlocking Scroll"
+    lore:
+      - "&d&oUnlock a locked equipment"
+      - "&d&oafter an unenchantment"
+      - "&d&oRight click with you locked"
+      - "&d&oequipment on an unenchanter"
+      - "&d&oto unlock it"
+      - "&d&o(Must be in your inventory)"
