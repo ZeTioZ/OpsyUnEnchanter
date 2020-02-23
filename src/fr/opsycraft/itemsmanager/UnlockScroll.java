@@ -9,6 +9,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
@@ -62,8 +63,9 @@ public class UnlockScroll implements Listener
 	public void registerUnlockScrollCraft()
 	{
 		if(configsFile.getBoolean("items.craft-unlock-scroll"))
-		{			
-			ShapedRecipe recipe = new ShapedRecipe(this.unlockScrollItem);
+		{
+			NamespacedKey key = new NamespacedKey(this.main.getPlugin(), "unlockscroll");
+			ShapedRecipe recipe = new ShapedRecipe(key, this.unlockScrollItem);
 			
 			recipe.shape("CBC", "BAB", "CBC");
 			recipe.setIngredient('A', Material.PAPER);

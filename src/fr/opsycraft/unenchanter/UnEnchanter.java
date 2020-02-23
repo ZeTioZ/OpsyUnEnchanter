@@ -77,7 +77,7 @@ public class UnEnchanter implements Listener
 	@EventHandler
 	public void onSpecialAnvilPlaced(BlockPlaceEvent e) 
 	{
-		ItemStack itemInHand = e.getPlayer().getItemInHand();
+		ItemStack itemInHand = e.getPlayer().getInventory().getItemInMainHand();
 		if(itemInHand != null && itemInHand.getType() == Material.ANVIL
 			&& itemInHand.getItemMeta().getLore() != null
 			&& itemInHand.getItemMeta().getLore().equals(specialAnvil.getItemMeta().getLore())
@@ -85,10 +85,9 @@ public class UnEnchanter implements Listener
 		{
 			Block underBlock = e.getBlock().getLocation().add(0, -1, 0).getBlock();
 			Player p = e.getPlayer();
-			if(underBlock.getType() != null 
-			   && (underBlock.getType() == Material.AIR
-			    || underBlock.getType() == Material.STATIONARY_LAVA
-			    || underBlock.getType() == Material.STATIONARY_WATER))
+			if ((underBlock.getType() == Material.AIR) ||
+				(underBlock.getType() == Material.LAVA) ||
+				(underBlock.getType() == Material.WATER))
 			{
 				e.setCancelled(true);
 				for(String line : messagesFile.getStringList("errors.must-be-block-under"))
@@ -97,10 +96,16 @@ public class UnEnchanter implements Listener
 					p.sendMessage(prefix + line);
 				}
 			}
-			else if(underBlock.getType() != null 
-					&& (underBlock.getType() == Material.GRAVEL
-					 || underBlock.getType() == Material.SAND
-					 || underBlock.getType() == Material.DOUBLE_PLANT))
+			else if ((underBlock.getType() == Material.GRAVEL) ||
+					(underBlock.getType() == Material.SAND) ||
+					(underBlock.getType() == Material.SUNFLOWER) ||
+					(underBlock.getType() == Material.ROSE_BUSH) ||
+					(underBlock.getType() == Material.TALL_GRASS) ||
+					(underBlock.getType() == Material.TALL_SEAGRASS) ||
+					(underBlock.getType() == Material.LARGE_FERN) ||
+					(underBlock.getType() == Material.LILAC) ||
+					(underBlock.getType() == Material.KELP_PLANT) ||
+					(underBlock.getType() == Material.SUGAR_CANE))
 			{
 				e.setCancelled(true);
 				for(String line : messagesFile.getStringList("errors.cant-be-sand-or-gravel-or-plant"))
@@ -143,7 +148,7 @@ public class UnEnchanter implements Listener
 				Player p = e.getPlayer();
 				if(configsFile.getBoolean("use-permission") || p.hasPermission("opsyunenchanter.use"))
 				{						
-					ItemStack itemToUnEnchant = p.getItemInHand();
+					ItemStack itemToUnEnchant = p.getInventory().getItemInMainHand();
 					if(itemToUnEnchant != null && itemToUnEnchant.getType() != Material.AIR) 
 					{
 						if(itemToUnEnchant.getItemMeta().getLore() != null && itemToUnEnchant.getItemMeta().getLore().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("locked-item-lore"))))
@@ -175,7 +180,7 @@ public class UnEnchanter implements Listener
 											newItemLore.remove(i - 1);
 											newItemMeta.setLore(newItemLore);
 											itemToUnEnchant.setItemMeta(newItemMeta);
-											p.setItemInHand(itemToUnEnchant);
+											p.getInventory().setItemInMainHand(itemToUnEnchant);
 										}
 										i++;
 									}
@@ -206,7 +211,7 @@ public class UnEnchanter implements Listener
 								public void run() {
 									playerInterface.setFirstInterfaceChoice(firstInterfaceChoise(playerInterface.getPlayer(), playerInterface.getItemToUnenchant()));
 									playerInterface.setOpenedAnvilLoc(e.getClickedBlock().getLocation());
-									playerInterface.getPlayer().setItemInHand(null);
+									playerInterface.getPlayer().getInventory().setItemInMainHand(null);
 								}
 							}, 2L);
 						}
@@ -298,23 +303,23 @@ public class UnEnchanter implements Listener
 	{
 		Inventory firstInterface =  Bukkit.createInventory(player, 27, ChatColor.translateAlternateColorCodes('&', configsFile.getString("first-interface.name")));
 		
-		ItemStack redGlassPane = new ItemStack(Material.STAINED_GLASS_PANE, 1,(byte) 14);
+		ItemStack redGlassPane = new ItemStack(Material.RED_STAINED_GLASS_PANE);
 		ItemMeta redGlassPaneMeta = redGlassPane.getItemMeta();
 		redGlassPaneMeta.setDisplayName(" ");
 		redGlassPane.setItemMeta(redGlassPaneMeta);
-		ItemStack blueGlassPane = new ItemStack(Material.STAINED_GLASS_PANE, 1,(byte) 11);
+		ItemStack blueGlassPane = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
 		ItemMeta blueGlassPaneMeta = blueGlassPane.getItemMeta();
 		blueGlassPaneMeta.setDisplayName(" ");
 		blueGlassPane.setItemMeta(blueGlassPaneMeta);
-		ItemStack greenGlassPane = new ItemStack(Material.STAINED_GLASS_PANE, 1,(byte) 13);
+		ItemStack greenGlassPane = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
 		ItemMeta greenGlassPaneMeta = greenGlassPane.getItemMeta();
 		greenGlassPaneMeta.setDisplayName(" ");
 		greenGlassPane.setItemMeta(greenGlassPaneMeta);
-		ItemStack redWool = new ItemStack(Material.WOOL, 1, (byte) 14);
+		ItemStack redWool = new ItemStack(Material.RED_WOOL);
 		ItemMeta redWoolMeta = redWool.getItemMeta();
 		redWoolMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', configsFile.getString("first-interface.refuse-button-name")));
 		redWool.setItemMeta(redWoolMeta);
-		ItemStack greenWool = new ItemStack(Material.WOOL, 1, (byte) 5);
+		ItemStack greenWool = new ItemStack(Material.GREEN_WOOL);
 		ItemMeta greenWoolMeta = greenWool.getItemMeta();
 		greenWoolMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', configsFile.getString("first-interface.accept-button-name")));
 		List<String> greenWoolLore = new ArrayList<>();
@@ -380,19 +385,19 @@ public class UnEnchanter implements Listener
 		
 		IndividualInterface playerInterface = playersInterfaces.get(player);
 		
-		ItemStack whiteGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 0);
+		ItemStack whiteGlassPane = new ItemStack(Material.WHITE_STAINED_GLASS_PANE);
 		ItemMeta whiteGlassPaneMeta = whiteGlassPane.getItemMeta();
 		whiteGlassPaneMeta.setDisplayName(" ");
 		whiteGlassPane.setItemMeta(whiteGlassPaneMeta);
-		ItemStack blueGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 11);
+		ItemStack blueGlassPane = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
 		ItemMeta blueGlassPaneMeta = blueGlassPane.getItemMeta();
 		blueGlassPaneMeta.setDisplayName(" ");
 		blueGlassPane.setItemMeta(blueGlassPaneMeta);
-		ItemStack yellowGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 4);
+		ItemStack yellowGlassPane = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
 		ItemMeta yellowGlassPaneMeta = yellowGlassPane.getItemMeta();
 		yellowGlassPaneMeta.setDisplayName(" ");
 		yellowGlassPane.setItemMeta(yellowGlassPaneMeta);
-		ItemStack blackGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 15);
+		ItemStack blackGlassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
 		ItemMeta blackGlassPaneMeta = blackGlassPane.getItemMeta();
 		blackGlassPaneMeta.setDisplayName(" ");
 		blackGlassPane.setItemMeta(blackGlassPaneMeta);
@@ -479,19 +484,19 @@ public class UnEnchanter implements Listener
 		
 		IndividualInterface playerInterface = playersInterfaces.get(player);
 		
-		ItemStack whiteGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 0);
+		ItemStack whiteGlassPane = new ItemStack(Material.WHITE_STAINED_GLASS_PANE);
 		ItemMeta whiteGlassPaneMeta = whiteGlassPane.getItemMeta();
 		whiteGlassPaneMeta.setDisplayName(" ");
 		whiteGlassPane.setItemMeta(whiteGlassPaneMeta);
-		ItemStack blueGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 11);
+		ItemStack blueGlassPane = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
 		ItemMeta blueGlassPaneMeta = blueGlassPane.getItemMeta();
 		blueGlassPaneMeta.setDisplayName(" ");
 		blueGlassPane.setItemMeta(blueGlassPaneMeta);
-		ItemStack yellowGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 4);
+		ItemStack yellowGlassPane = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
 		ItemMeta yellowGlassPaneMeta = yellowGlassPane.getItemMeta();
 		yellowGlassPaneMeta.setDisplayName(" ");
 		yellowGlassPane.setItemMeta(yellowGlassPaneMeta);
-		ItemStack blackGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 15);
+		ItemStack blackGlassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
 		ItemMeta blackGlassPaneMeta = blackGlassPane.getItemMeta();
 		blackGlassPaneMeta.setDisplayName(" ");
 		blackGlassPane.setItemMeta(blackGlassPaneMeta);

@@ -54,7 +54,7 @@ public class IndividualInterface
 	public IndividualInterface(Player p) 
 	{
 		this.p = p;
-		this.itemToUnenchant = p.getItemInHand();
+		this.itemToUnenchant = p.getInventory().getItemInMainHand();
 		this.itemEnchants = this.itemToUnenchant.getEnchantments();
 	}
 	//endregion

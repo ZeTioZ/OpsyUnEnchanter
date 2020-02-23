@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -52,10 +53,11 @@ public class SpecialAnvil
 	{
 		if(configsFile.getBoolean("items.craft-special-anvil"))
 		{
-			ShapedRecipe recipe = new ShapedRecipe(this.specialAnvilItem);
+			NamespacedKey key = new NamespacedKey(this.main.getPlugin(), "unenchanter_anvil");
+			ShapedRecipe recipe = new ShapedRecipe(key, this.specialAnvilItem);
 			
 			recipe.shape(" C ", "BAB", "AAA");
-			recipe.setIngredient('A', Material.ENCHANTMENT_TABLE);
+			recipe.setIngredient('A', Material.ENCHANTING_TABLE);
 			recipe.setIngredient('B', Material.DIAMOND);
 			recipe.setIngredient('C', Material.ANVIL);
 			
