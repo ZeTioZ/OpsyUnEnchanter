@@ -95,7 +95,7 @@ public class UnEnchanterCommands implements CommandExecutor
 					}
 					else
 					{	
-						for(String line : messagesFile.getStringList("errors.not-enought-permissions"))
+						for(String line : messagesFile.getStringList("errors.not-enough-permissions"))
 						{
 							line = ChatColor.translateAlternateColorCodes('&', line);
 							sender.sendMessage(prefix + line);

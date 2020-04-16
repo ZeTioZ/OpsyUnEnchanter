@@ -112,7 +112,7 @@ public class UnEnchanter implements Listener
 				}
 				else
 				{
-					for(String line : messagesFile.getStringList("errors-not-enought-permissions"))
+					for(String line : messagesFile.getStringList("errors-not-enough-permissions"))
 					{
 						line = ChatColor.translateAlternateColorCodes('&', line);
 						p.sendMessage(prefix + line);
@@ -224,7 +224,7 @@ public class UnEnchanter implements Listener
 				}
 				else
 				{
-					for(String line : messagesFile.getStringList("errors.not-enought-permission"))
+					for(String line : messagesFile.getStringList("errors.not-enough-permission"))
 					{
 						line = ChatColor.translateAlternateColorCodes('&', line);
 						p.sendMessage(prefix + line);
@@ -1464,7 +1464,7 @@ public class UnEnchanter implements Listener
 				}
 				else
 				{
-					for(String line : messagesFile.getStringList("errors.not-enought-permissions"))
+					for(String line : messagesFile.getStringList("errors.not-enough-permissions"))
 					{
 						line = ChatColor.translateAlternateColorCodes('&', line);
 						e.getPlayer().sendMessage(prefix + line);
