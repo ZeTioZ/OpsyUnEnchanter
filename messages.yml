@@ -41,7 +41,7 @@ errors:
     - "&cYou haven't selected any enchantment..."
     - "&cPlease, choose an enchantment by clicking on an emerald..."
   not-enough-XP:
-    - "&cYou don't have enough xp to get thoses enchantments"
+    - "&cYou don't have enough xp to get these enchantments"
     - "&cYou need &2{price} XP &cto get them."
     - "&cUse &c\"&a/xp&2\" &cto see your actual xp amount."
   already-selected-max-enchants:
@@ -54,8 +54,15 @@ errors:
     - "&cThe maximum drop percentage is 100% and it must be higher than 0%!"
   invalid-drop-mobs:
     - "&cThe mob {mob} that you added to the mobs drop list is invalid!"
+  invalid-sound:
+    - "&cThe sound {sound} doesn't exist in your server version!"
+    - "&cPlease remove it from the configs file."
+  invalid-material:
+    - "&cInvalid material {material} in the configs file! Remove it."
   unknown-command:
-    - "&cUnknown desenchant command!"
-    - "&cPlease use \"/desench help\" to know all the available commands."
-  not-enought-permissions:
+    - "&cUnknown unenchant command!"
+    - "&cPlease use \"/ds help\" to know all the available commands."
+  not-enough-permissions:
     - "&cSorry, you don't have enought permissions to do that!"
+  must-be-a-player:
+    - "&cOnly in game players can execute that command!"

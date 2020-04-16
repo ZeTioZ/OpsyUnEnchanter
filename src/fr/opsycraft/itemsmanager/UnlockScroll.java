@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -83,7 +82,7 @@ public class UnlockScroll implements Listener
 		{
 			for(String entityTypeString : configsFile.getStringList("drop-mobs"))
 			{
-				if(EnumUtils.isValidEnum(EntityType.class, entityTypeString.toUpperCase()))
+				try
 				{
 					if(e.getEntity().getType() == EntityType.valueOf(entityTypeString.toUpperCase()))
 					{
@@ -122,7 +121,7 @@ public class UnlockScroll implements Listener
 						}
 					}
 				}
-				else
+				catch(IllegalArgumentException ex)
 				{
 					for(String line : messagesFile.getStringList("errors.invalid-drop-mobs"))
 					{

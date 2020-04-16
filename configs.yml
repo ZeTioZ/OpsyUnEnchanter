@@ -8,6 +8,23 @@ use-permission: false
 ## -- Define if wether or not the player has to have the permission "opsyunenchanter.place" to place a special anvil -- ##
 place-permission: false
 
+block-under-place:
+  - "AIR"
+  - "LAVA"
+  - "WATER"
+  
+block-under-empty-place:
+  - "GRAVEL"
+  - "SAND"
+  - "SUNFLOWER"
+  - "ROSE_BUSH"
+  - "TALL_GRASS"
+  - "TALL_SEAGRASS"
+  - "LARGE_FERN"
+  - "LILAC"
+  - "KELP_PLANT"
+  - "SUGAR_CANE"
+
 ## -- Define if wether or not the player has to have the permission "opsyunenchanter.break" to break a special anvil -- ##
 break-permission: false
 
@@ -44,7 +61,17 @@ drop-rate: 10
 drop-mobs:
   - "ZOMBIE"
   - "SKELETON"
+  - "PIG_ZOMBIE"
+  - "CREEPER"
   - "ENDERMAN"
+  - "VEX"
+  - "EVOKER"
+  - "VINDICATOR"
+  - "ZOMBIE_VILLAGER"
+  - "HUSK"
+  - "SHULKER"
+  - "ILLUSIONER"
+  - "DROWNED"
   - "SILVERFISH"
   - "SPIDER"
   - "CAVE_SPIDER"
@@ -52,7 +79,10 @@ drop-mobs:
   - "GHAST"
   - "PIG_ZOMBIE"
   - "GUARDIAN"
+  - "ELDER_GUARDIAN"
   - "ENDER_DRAGON"
+  - "ENDERMITE"
+  - "PHANTOM"
   - "MAGMA_CUBE"
   - "BLAZE"
   - "SLIME"
@@ -80,7 +110,9 @@ sounds:
 # -- Interfaces Language -- #
 first-interface:
   name: "&2Accept the unenchantment ?"
+  accept-button-item: "GREEN_WOOL"
   accept-button-name: "&aAccept"
+  refuse-button-item: "RED_WOOL"
   refuse-button-name: "&cRefuse"
   more-5-button-lore:
     - "&dYou have 5 or more enchantments"
@@ -91,6 +123,10 @@ first-interface:
     - "&dYou'll be able to choose"
     - "&dThe enchantments to keep"
     - "&d(Maximum of 2 enchantments)"
+  refuse-decoration: "RED_STAINED_GLASS_PANE"
+  accept-decoration: "GREEN_STAINED_GLASS_PANE"
+  middle-decoration: "BLUE_STAINED_GLASS_PANE"
+  
 
 less-5-interface:
   name: "&2Choose your enchantments..."
@@ -98,12 +134,20 @@ less-5-interface:
   enchantment-selected-name: "&2Enchantment Selected"
   enchantment-price-lore:
     - "&dPrice: &c{price} XP"
+  first-decoration: "WHITE_STAINED_GLASS_PANE"
+  second-decoration: "YELLOW_STAINED_GLASS_PANE"
+  first-middle-decoration: "BLUE_STAINED_GLASS_PANE"
+  second-middle-decoration: "BLACK_STAINED_GLASS_PANE"
 
 more-5-interface:
   name: "&2Upgrade the catalyzer..."
   catalyzer-name: "&2Enchantment(s) to keep..."
   price-lore:
     - "&dPrice: &c{price} XP"
+  first-decoration: "WHITE_STAINED_GLASS_PANE"
+  second-decoration: "YELLOW_STAINED_GLASS_PANE"
+  first-middle-decoration: "BLUE_STAINED_GLASS_PANE"
+  second-middle-decoration: "BLACK_STAINED_GLASS_PANE"
 
 # -- Blocked Item Lore --#
 locked-item-lore: "&4LOCKED"

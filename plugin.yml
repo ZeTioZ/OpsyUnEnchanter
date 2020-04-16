@@ -2,6 +2,7 @@ name: OpsyUnEnchanter
 version: 1.0
 author: ZeTioZ
 main: fr.opsycraft.unenchanter.Main
+api-version: 1.13
 commands:
   desenchant:
     aliases: [desench, ds]
@@ -15,6 +16,6 @@ commands:
     description: Reload the plugin
     permission: opsyunenchanter.reload
   permissions:
-    opsyunenchanter.use: Allow players to place a special anvil
+    opsyunenchanter.use: Allow players to use a special anvil
     opsyunenchanter.place: Allow players to place a special anvil
     opsyunenchanter.break: Allow players to break special anvil
