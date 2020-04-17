@@ -794,34 +794,7 @@ public class UnEnchanter implements Listener
 			itemS.setItemMeta(itemSMeta);
 			inv.setItem(whichSlot, itemS);
 			playerInterface.getEnchantedBook().setItemMeta(bookStorage);
-			int emeraldLevels = 0;
-			for(ItemStack emeraldSelected : inv.getContents())
-			{
-				if(emeraldSelected.getType() == Material.PAPER
-					&& emeraldSelected.getItemMeta().getDisplayName().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("less-5-interface.enchantment-selected-name"))))
-				{
-					for(Enchantment ench : emeraldSelected.getEnchantments().keySet())
-					{
-						emeraldLevels += emeraldSelected.getEnchantments().get(ench);
-					}
-				}
-			}
-			int enchants = playerInterface.getSelectedEnchants();
-			int enchantsLevel = emeraldLevels;
-			double result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
-			ItemStack uIEnchantedBook = playerInterface.getEnchantedBook();
-			ItemMeta uIEnchantedBookMeta = uIEnchantedBook.getItemMeta();
-			List<String> uIEnchantedBookLore = new ArrayList<>();
-			uIEnchantedBookLore.add(" ");
-			for(String line : configsFile.getStringList("less-5-interface.enchantment-price-lore"))
-			{
-				line = ChatColor.translateAlternateColorCodes('&', line);
-				line = line.replace("{price}", String.valueOf(result));
-				uIEnchantedBookLore.add(line);
-			}
-			uIEnchantedBookMeta.setLore(uIEnchantedBookLore);
-			uIEnchantedBook.setItemMeta(uIEnchantedBookMeta);
-			inv.setItem(16, uIEnchantedBook);
+			bookUpdate(playerInterface, inv);
 		}
 		else if(itemS.getType() == Material.PAPER)
 		{
@@ -851,36 +824,42 @@ public class UnEnchanter implements Listener
 			}
 			else
 			{
-				int emeraldLevels = 0;
-				for(ItemStack emeraldSelected : inv.getContents())
-				{
-					if(emeraldSelected.getType() == Material.PAPER
-						&& emeraldSelected.getItemMeta().getDisplayName().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("less-5-interface.enchantment-selected-name"))))
-					{
-						for(Enchantment ench : emeraldSelected.getEnchantments().keySet())
-						{
-							emeraldLevels += emeraldSelected.getEnchantments().get(ench);
-						}
-					}
-				}
-				int enchants = playerInterface.getSelectedEnchants();
-				int enchantsLevel = emeraldLevels;
-				double result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
-				ItemStack uIEnchantedBook = playerInterface.getEnchantedBook();
-				ItemMeta uIEnchantedBookMeta = uIEnchantedBook.getItemMeta();
-				List<String> uIEnchantedBookLore = new ArrayList<>();
-				uIEnchantedBookLore.add(" ");
-				for(String line : configsFile.getStringList("less-5-interface.enchantment-price-lore"))
-				{
-					line = ChatColor.translateAlternateColorCodes('&', line);
-					line = line.replace("{price}", String.valueOf(result));
-					uIEnchantedBookLore.add(line);
-				}
-				uIEnchantedBookMeta.setLore(uIEnchantedBookLore);
-				uIEnchantedBook.setItemMeta(uIEnchantedBookMeta);
-				inv.setItem(16, uIEnchantedBook);
+				bookUpdate(playerInterface, inv);
 			}
 		}
+	}
+	//endregion
+
+	//region Book Update
+	private void bookUpdate(IndividualInterface playerInterface, Inventory inv) {
+		int emeraldLevels = 0;
+		for(ItemStack emeraldSelected : inv.getContents())
+		{
+			if(emeraldSelected.getType() == Material.PAPER
+				&& emeraldSelected.getItemMeta().getDisplayName().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("less-5-interface.enchantment-selected-name"))))
+			{
+				for(Enchantment ench : emeraldSelected.getEnchantments().keySet())
+				{
+					emeraldLevels += emeraldSelected.getEnchantments().get(ench);
+				}
+			}
+		}
+		int enchants = playerInterface.getSelectedEnchants();
+		int enchantsLevel = emeraldLevels;
+		double result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
+		ItemStack uIEnchantedBook = playerInterface.getEnchantedBook();
+		ItemMeta uIEnchantedBookMeta = uIEnchantedBook.getItemMeta();
+		List<String> uIEnchantedBookLore = new ArrayList<>();
+		uIEnchantedBookLore.add(" ");
+		for(String line : configsFile.getStringList("less-5-interface.enchantment-price-lore"))
+		{
+			line = ChatColor.translateAlternateColorCodes('&', line);
+			line = line.replace("{price}", String.valueOf(result));
+			uIEnchantedBookLore.add(line);
+		}
+		uIEnchantedBookMeta.setLore(uIEnchantedBookLore);
+		uIEnchantedBook.setItemMeta(uIEnchantedBookMeta);
+		inv.setItem(16, uIEnchantedBook);
 	}
 	//endregion
 	
@@ -894,51 +873,25 @@ public class UnEnchanter implements Listener
 		{
 			IndividualInterface playerInterface = playersInterfaces.get(p);
 			int catalyzerLevel = playerInterface.getCatalyzerLevel();
+			String catalyzerLevelString = "";
 			if(catalyzerLevel >= 1 && catalyzerLevel < 4)
 			{
 				catalyzerLevel += 1;
 				playerInterface.setCatalyzerLevel(catalyzerLevel);
-				List<String> catalyzerLore = new ArrayList<>();
 				StringBuilder catalyzerLevelSTB = new StringBuilder();
 				for(int i = 0; i < catalyzerLevel; i++)
 				{
 					catalyzerLevelSTB.append("I");
 				}
-				String catalyzerLevelString = catalyzerLevelSTB.toString();
-				double baseCost = configsFile.getDouble("catalyzer-base-price");
-				double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
-				int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
-				catalyzerLore.add(catalyzerLevelString);
-				for(String line: configsFile.getStringList("more-5-interface.price-lore"))
-				{
-					line = ChatColor.translateAlternateColorCodes('&', line);
-					line = line.replace("{price}", String.valueOf(costFormula));
-					catalyzerLore.add(line);
-				}
-				catalyzerMeta.setLore(catalyzerLore);
-				catalyzer.setItemMeta(catalyzerMeta);
-				p.updateInventory();
+				catalyzerLevelString = catalyzerLevelSTB.toString();
 			}
 			else if(catalyzerLevel == 4)
 			{
+				catalyzerLevel = 1;
 				playerInterface.setCatalyzerLevel(1);
-				List<String> catalyzerLore = new ArrayList<>();
-				String catalyzerLevelString = "I";
-				catalyzerLevel = playerInterface.getCatalyzerLevel();
-				double baseCost = configsFile.getDouble("catalyzer-base-price");
-				double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
-				int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
-				catalyzerLore.add(catalyzerLevelString);
-				for(String line: configsFile.getStringList("more-5-interface.price-lore"))
-				{
-					line = ChatColor.translateAlternateColorCodes('&', line);
-					line = line.replace("{price}", String.valueOf(costFormula));
-					catalyzerLore.add(line);
-				}
-				catalyzerMeta.setLore(catalyzerLore);
-				catalyzer.setItemMeta(catalyzerMeta);
-				p.updateInventory();
+				catalyzerLevelString = "I";
 			}
+			catalyzerUpdate(p, catalyzer, catalyzerMeta, catalyzerLevel, catalyzerLevelString);
 		}
 	}
 	//endregion
@@ -953,56 +906,46 @@ public class UnEnchanter implements Listener
 		{
 			IndividualInterface playerInterface = playersInterfaces.get(p);
 			int catalyzerLevel = playerInterface.getCatalyzerLevel();
+			String catalyzerLevelString = "";
 			if(catalyzerLevel >= 2 && catalyzerLevel <= 4)
 			{
 				catalyzerLevel -= 1;
 				playerInterface.setCatalyzerLevel(catalyzerLevel);
-				List<String> catalyzerLore = new ArrayList<>();
 				StringBuilder catalyzerLevelSTB = new StringBuilder();
 				for(int i = 0; i < catalyzerLevel; i++)
 				{
 					catalyzerLevelSTB.append("I");
 				}
-				String catalyzerLevelString = catalyzerLevelSTB.toString();
-				double baseCost = configsFile.getDouble("catalyzer-base-price");
-				double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
-				int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
-				catalyzerLore.add(catalyzerLevelString);
-				for(String line: configsFile.getStringList("more-5-interface.price-lore"))
-				{
-					line = ChatColor.translateAlternateColorCodes('&', line);
-					line = line.replace("{price}", String.valueOf(costFormula));
-					catalyzerLore.add(line);
-				}
-				catalyzerMeta.setLore(catalyzerLore);
-				catalyzer.setItemMeta(catalyzerMeta);
-				p.updateInventory();
+				catalyzerLevelString = catalyzerLevelSTB.toString();
 			}
 			else if(catalyzerLevel == 1)
 			{
 				catalyzerLevel = 4;
 				playerInterface.setCatalyzerLevel(4);
-				List<String> catalyzerLore = new ArrayList<>();
-				String catalyzerLevelString = "IIII";
-				double baseCost = configsFile.getDouble("catalyzer-base-price");
-				double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
-				int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
-				catalyzerLore.add(catalyzerLevelString);
-				for(String line: configsFile.getStringList("more-5-interface.price-lore"))
-				{
-					line = ChatColor.translateAlternateColorCodes('&', line);
-					line = line.replace("{price}", String.valueOf(costFormula));
-					catalyzerLore.add(line);
-				}
-				catalyzerMeta.setLore(catalyzerLore);
-				catalyzer.setItemMeta(catalyzerMeta);
-				p.updateInventory();
+				catalyzerLevelString = "IIII";
 			}
-			else
-			{
-				p.sendMessage("&cAn error occured ! Please contact the server administrator. ERROR CODE: #781");
-			}
+			catalyzerUpdate(p, catalyzer, catalyzerMeta, catalyzerLevel, catalyzerLevelString);
 		}
+	}
+	//endregion
+	
+	//region Catalyzer Update
+	private void catalyzerUpdate(Player p, ItemStack catalyzer, ItemMeta catalyzerMeta, int catalyzerLevel, String catalyzerLevelString)
+	{
+		double baseCost = configsFile.getDouble("catalyzer-base-price");
+		double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
+		int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
+		List<String> catalyzerLore = new ArrayList<>();
+		catalyzerLore.add(catalyzerLevelString);
+		for(String line: configsFile.getStringList("more-5-interface.price-lore"))
+		{
+			line = ChatColor.translateAlternateColorCodes('&', line);
+			line = line.replace("{price}", String.valueOf(costFormula));
+			catalyzerLore.add(line);
+		}
+		catalyzerMeta.setLore(catalyzerLore);
+		catalyzer.setItemMeta(catalyzerMeta);
+		p.updateInventory();
 	}
 	//endregion
 	
@@ -1115,24 +1058,24 @@ public class UnEnchanter implements Listener
 						}
 					}
 					break;
-				case 16:	
+				case 16:
+					playerInterface.setClosedInventory(true);
+					p.closeInventory();
+					try
+					{					
+						((Player)e.getWhoClicked()).getWorld().playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.first-interface.accept-click-sound").toUpperCase()), 5, 5);
+					}
+					catch(IllegalArgumentException ex)
+					{
+						for(String line : messagesFile.getStringList("errors.invalid-sound"))
+						{
+							line = line.replace("{sound}", configsFile.getString("sounds.first-interface.accept-click-sound"));
+							line = ChatColor.translateAlternateColorCodes('&', line);
+							main.getLogger().warning(line);
+						}
+					}
 					if(playerInterface.getItemEnchantsSet().size() < 5)
 					{
-						playerInterface.setClosedInventory(true);
-						p.closeInventory();
-						try
-						{					
-							((Player)e.getWhoClicked()).getWorld().playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.first-interface.accept-click-sound").toUpperCase()), 5, 5);
-						}
-						catch(IllegalArgumentException ex)
-						{
-							for(String line : messagesFile.getStringList("errors.invalid-sound"))
-							{
-								line = line.replace("{sound}", configsFile.getString("sounds.first-interface.accept-click-sound"));
-								line = ChatColor.translateAlternateColorCodes('&', line);
-								main.getLogger().warning(line);
-							}
-						}
 						Bukkit.getScheduler().scheduleSyncDelayedTask(main.getPlugin(), new Runnable() {
 				            public void run() {
 				            	playerInterface.setUnEnchanterChooseInterface(unEnchanterChooseInterface(p, pItem));
@@ -1141,21 +1084,6 @@ public class UnEnchanter implements Listener
 					}
 					else if(playerInterface.getItemEnchantsSet().size() >= 5)
 					{
-						playerInterface.setClosedInventory(true);
-						p.closeInventory();
-						try
-						{					
-							((Player)e.getWhoClicked()).getWorld().playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.first-interface.accept-click-sound").toUpperCase()), 5, 5);
-						}
-						catch(IllegalArgumentException ex)
-						{
-							for(String line : messagesFile.getStringList("errors.invalid-sound"))
-							{
-								line = line.replace("{sound}", configsFile.getString("sounds.first-interface.accept-click-sound"));
-								line = ChatColor.translateAlternateColorCodes('&', line);
-								main.getLogger().warning(line);
-							}
-						}
 						Bukkit.getScheduler().scheduleSyncDelayedTask(main.getPlugin(), new Runnable() {
 				            public void run() {
 				            	playerInterface.setUnEnchanterInterfaceRandom(unEnchanterInterfaceRandom(p, pItem));
@@ -1169,27 +1097,83 @@ public class UnEnchanter implements Listener
 			}
 			//endregion
 			
-			//region Second Interface (Less than 5 enchants)
-			else if(playerInterface.getUnEnchanterChooseInterface() != null) 
+			//region Second Interface (Less and more than 5 enchants)
+			else if(playerInterface.getUnEnchanterChooseInterface() != null || playerInterface.getUnEnchanterInterfaceRandom() != null)
 			{		
-				if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterChooseInterface()))
+				
+				e.setCancelled(true);
+				switch(e.getSlot()) 
 				{
-					e.setCancelled(true);
-					switch(e.getSlot()) 
-					{
-						case 3:
+					case 3:
+						if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterChooseInterface()))
+						{
 							selectEmerad(playerInterface, e.getCurrentItem(), 1, e.getClickedInventory(), 3);
-							break;
-						case 5:
+						}
+						break;
+					case 5:
+						if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterChooseInterface()))
+						{
 							selectEmerad(playerInterface, e.getCurrentItem(), 2, e.getClickedInventory(), 5);
-							break;
-						case 21:
+						}
+						break;
+					case 13:
+						if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterInterfaceRandom()))
+						{
+							if(e.getClick().isLeftClick())
+							{
+								try
+								{					
+									playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.increment-catalyzer-level-sound").toUpperCase()), 5, 5);
+								}
+								catch(IllegalArgumentException ex)
+								{
+									for(String line : messagesFile.getStringList("errors.invalid-sound"))
+									{
+										line = line.replace("{sound}", configsFile.getString("sounds.more-5-interface.increment-catalyzer-level-sound"));
+										line = ChatColor.translateAlternateColorCodes('&', line);
+										main.getLogger().warning(line);
+									}
+								}
+								incrementCatalyzerLevel((Player)e.getWhoClicked(), e.getCurrentItem());
+								onRandomPick(p, playerInterface.getItemEnchants(), false);
+							}
+							else if(e.getClick().isRightClick())
+							{
+								try
+								{					
+									playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.decrement-catalyzer-level-sound").toUpperCase()), 5, 5);
+								}
+								catch(IllegalArgumentException ex)
+								{
+									for(String line : messagesFile.getStringList("errors.invalid-sound"))
+									{
+										line = line.replace("{sound}", configsFile.getString("sounds.more-5-interface.decrement-catalyzer-level-sound"));
+										line = ChatColor.translateAlternateColorCodes('&', line);
+										main.getLogger().warning(line);
+									}
+								}
+								decrementCatalyzerLevel((Player) e.getWhoClicked(), e.getCurrentItem());
+								onRandomPick(p, playerInterface.getItemEnchants(), true);
+							}
+						}
+						break;
+					case 21:
+						if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterChooseInterface()))
+						{
 							selectEmerad(playerInterface, e.getCurrentItem(), 3, e.getClickedInventory(), 21);
-							break;
-						case 23:
+						}
+						break;
+					case 23:
+						if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterChooseInterface()))
+						{
 							selectEmerad(playerInterface, e.getCurrentItem(), 4, e.getClickedInventory(), 23);
-							break;
-						case 16:
+						}
+						break;
+					case 16:
+						double result = 0;
+						float pExp = ((Player) e.getWhoClicked()).getTotalExperience();
+						if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterChooseInterface()))
+						{
 							if(playerInterface.getSelectedEnchants() <= 0)
 							{
 								for(String line : messagesFile.getStringList("errors.no-enchants-selected"))
@@ -1205,7 +1189,7 @@ public class UnEnchanter implements Listener
 								for(ItemStack emeraldSelected : e.getClickedInventory().getContents())
 								{
 									if(emeraldSelected.getType() == Material.PAPER
-										&& emeraldSelected.getItemMeta().getDisplayName().contains(configsFile.getString("less-5-interface.enchantment-selected-name")))
+										&& emeraldSelected.getItemMeta().getDisplayName().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("less-5-interface.enchantment-selected-name"))))
 									{
 										for(Enchantment ench : emeraldSelected.getEnchantments().keySet())
 										{
@@ -1215,137 +1199,27 @@ public class UnEnchanter implements Listener
 								}
 								int enchants = playerInterface.getSelectedEnchants();
 								int enchantsLevel = emeraldLevels;
-								double result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
-								float pExp = ((Player) e.getWhoClicked()).getTotalExperience();
-								if(pExp >= result)
-								{
-									for(Enchantment ench : playerInterface.getEnchantedBookSet()) 
-									{
-										playerInterface.getItemToUnenchant().removeEnchantment(ench);
-									}
-									if(configsFile.getBoolean("weapon-lock"))
-									{
-										ItemMeta itemMeta = playerInterface.getItemToUnenchant().getItemMeta();
-										List<String> itemLore = itemMeta.getLore();
-										if(itemLore == null) {
-											itemLore = new ArrayList<>();
-										}
-										itemLore.add(" ");
-										itemLore.add(ChatColor.translateAlternateColorCodes('&', configsFile.getString("locked-item-lore")));
-										itemMeta.setLore(itemLore);
-										playerInterface.getItemToUnenchant().setItemMeta(itemMeta);
-									}
-									ItemMeta enchantedBookToGiveMeta = playerInterface.getEnchantedBook().getItemMeta();
-									enchantedBookToGiveMeta.setLore(new ArrayList<>());
-									playerInterface.getEnchantedBook().setItemMeta(enchantedBookToGiveMeta);
-									playerInterface.getPlayer().setTotalExperience(0);
-									playerInterface.getPlayer().setExp(0);
-									playerInterface.getPlayer().setLevel(0);
-									playerInterface.getPlayer().giveExp((int) Math.round(pExp - result));
-									giveUnEnchantedItemBack(p, playerInterface.getEnchantedBook(), true);
-									giveUnEnchantedItemBack(p, playerInterface.getItemToUnenchant(), true);
-								}
-								else
-								{
-									for(String line : messagesFile.getStringList("errors.not-enough-XP"))
-									{
-										line = ChatColor.translateAlternateColorCodes('&', line);
-										line = line.replace("{price}", String.valueOf(Math.round((result - pExp))));
-										playerInterface.getPlayer().sendMessage(prefix + line);
-									}
-									try
-									{					
-										playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.not-enough-xp-sound").toUpperCase()), 5, 5);
-									}
-									catch(IllegalArgumentException ex)
-									{
-										for(String line : messagesFile.getStringList("errors.invalid-sound"))
-										{
-											line = line.replace("{sound}", configsFile.getString("sounds.not-enough-xp-sound"));
-											line = ChatColor.translateAlternateColorCodes('&', line);
-											main.getLogger().warning(line);
-										}
-									}
-									break;
-								}
+								result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
 							}
-							playerInterface.setClosedInventory(true);
-							try
-							{					
-								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.unenchantment-done-sound").toUpperCase()), 5, 5);
-							}
-							catch(IllegalArgumentException ex)
-							{
-								for(String line : messagesFile.getStringList("errors.invalid-sound"))
-								{
-									line = line.replace("{sound}", configsFile.getString("sounds.unenchantment-done-sound"));
-									line = ChatColor.translateAlternateColorCodes('&', line);
-									main.getLogger().warning(line);
-								}
-							}
-							playerInterface.getPlayer().closeInventory();
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			//endregion
-			
-			//region Third Interface (More than 5 enchants)
-			else if(playerInterface.getUnEnchanterInterfaceRandom() != null
-					&& e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterInterfaceRandom())) 
-			{	
-				e.setCancelled(true);
-				switch(e.getSlot()) 
-				{
-					case 13:
-						if(e.getClick().isLeftClick())
-						{
-							try
-							{					
-								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.increment-catalyzer-level-sound").toUpperCase()), 5, 5);
-							}
-							catch(IllegalArgumentException ex)
-							{
-								for(String line : messagesFile.getStringList("errors.invalid-sound"))
-								{
-									line = line.replace("{sound}", configsFile.getString("sounds.more-5-interface.increment-catalyzer-level-sound"));
-									line = ChatColor.translateAlternateColorCodes('&', line);
-									main.getLogger().warning(line);
-								}
-							}
-							incrementCatalyzerLevel((Player)e.getWhoClicked(), e.getCurrentItem());
-							onRandomPick(p, playerInterface.getItemEnchants(), false);
-							break;								
 						}
-						else if(e.getClick().isRightClick())
+						else if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterInterfaceRandom()))
 						{
-							try
-							{					
-								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.decrement-catalyzer-level-sound").toUpperCase()), 5, 5);
-							}
-							catch(IllegalArgumentException ex)
-							{
-								for(String line : messagesFile.getStringList("errors.invalid-sound"))
-								{
-									line = line.replace("{sound}", configsFile.getString("sounds.more-5-interface.decrement-catalyzer-level-sound"));
-									line = ChatColor.translateAlternateColorCodes('&', line);
-									main.getLogger().warning(line);
-								}
-							}
-							decrementCatalyzerLevel((Player) e.getWhoClicked(), e.getCurrentItem());
-							onRandomPick(p, playerInterface.getItemEnchants(), true);
-							break;
-						}
-					case 16:
 							int catalyzerLevel = playerInterface.getCatalyzerLevel();
 							double baseCost = configsFile.getInt("catalyzer-base-price");
 							double levelMultiplier = configsFile.getInt("catalyzer-level-multiplier");
-							double result = baseCost * levelMultiplier * catalyzerLevel;
-							float pExp = ((Player) e.getWhoClicked()).getTotalExperience();
-							if(pExp >= result)
+							result = baseCost * levelMultiplier * catalyzerLevel;
+						}
+						if(pExp >= result)
+						{
+							if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterChooseInterface()))
 							{
+								for(Enchantment ench : playerInterface.getEnchantedBookSet()) 
+								{
+									playerInterface.getItemToUnenchant().removeEnchantment(ench);
+								}
+							}
+							else if(e.getClickedInventory() != null && e.getClickedInventory().equals(playerInterface.getUnEnchanterInterfaceRandom()))
+							{								
 								EnchantmentStorageMeta bookStorage = (EnchantmentStorageMeta) playerInterface.getEnchantedBook().getItemMeta();
 								playerInterface.getEnchantedBook().setItemMeta(bookStorage);
 								for(Enchantment ench : playerInterface.getRandomEnchants().keySet())
@@ -1354,48 +1228,52 @@ public class UnEnchanter implements Listener
 									bookStorage.addStoredEnchant(ench, playerInterface.getRandomEnchants().get(ench), true);
 									playerInterface.getEnchantedBook().setItemMeta(bookStorage);
 								}
-								if(configsFile.getBoolean("weapon-lock"))
-								{
-									ItemMeta itemMeta = playerInterface.getItemToUnenchant().getItemMeta();
-									List<String> itemLore = itemMeta.getLore();
-									if(itemLore == null) {
-										itemLore = new ArrayList<>();
-									}
-									itemLore.add(" ");
-									itemLore.add(ChatColor.translateAlternateColorCodes('&', configsFile.getString("locked-item-lore")));
-									itemMeta.setLore(itemLore);
-									playerInterface.getItemToUnenchant().setItemMeta(itemMeta);
-								}
-								playerInterface.getPlayer().setTotalExperience(0);
-								playerInterface.getPlayer().setExp(0);
-								playerInterface.getPlayer().setLevel(0);
-								playerInterface.getPlayer().giveExp((int) Math.round(pExp - result));
-								giveUnEnchantedItemBack(p, playerInterface.getEnchantedBook(), true);
-								giveUnEnchantedItemBack(p, playerInterface.getItemToUnenchant(), true);
 							}
-							else
+							if(configsFile.getBoolean("weapon-lock"))
 							{
-								for(String line : messagesFile.getStringList("errors.not-enough-XP"))
-								{
-									line = ChatColor.translateAlternateColorCodes('&', line);
-									line = line.replace("{price}", String.valueOf(Math.round((result - pExp))));
-									playerInterface.getPlayer().sendMessage(prefix + line);
+								ItemMeta itemMeta = playerInterface.getItemToUnenchant().getItemMeta();
+								List<String> itemLore = itemMeta.getLore();
+								if(itemLore == null) {
+									itemLore = new ArrayList<>();
 								}
-								try
-								{					
-									playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.not-enough-xp-sound").toUpperCase()), 5, 5);
-								}
-								catch(IllegalArgumentException ex)
-								{
-									for(String line : messagesFile.getStringList("errors.invalid-sound"))
-									{
-										line = line.replace("{sound}", configsFile.getString("sounds.not-enough-xp-sound"));
-										line = ChatColor.translateAlternateColorCodes('&', line);
-										main.getLogger().warning(line);
-									}
-								}
-								break;
+								itemLore.add(" ");
+								itemLore.add(ChatColor.translateAlternateColorCodes('&', configsFile.getString("locked-item-lore")));
+								itemMeta.setLore(itemLore);
+								playerInterface.getItemToUnenchant().setItemMeta(itemMeta);
 							}
+							ItemMeta enchantedBookToGiveMeta = playerInterface.getEnchantedBook().getItemMeta();
+							enchantedBookToGiveMeta.setLore(new ArrayList<>());
+							playerInterface.getEnchantedBook().setItemMeta(enchantedBookToGiveMeta);
+							playerInterface.getPlayer().setTotalExperience(0);
+							playerInterface.getPlayer().setExp(0);
+							playerInterface.getPlayer().setLevel(0);
+							playerInterface.getPlayer().giveExp((int) Math.round(pExp - result));
+							giveUnEnchantedItemBack(p, playerInterface.getEnchantedBook(), true);
+							giveUnEnchantedItemBack(p, playerInterface.getItemToUnenchant(), true);
+						}
+						else
+						{
+							for(String line : messagesFile.getStringList("errors.not-enough-XP"))
+							{
+								line = ChatColor.translateAlternateColorCodes('&', line);
+								line = line.replace("{price}", String.valueOf(Math.round((result - pExp))));
+								playerInterface.getPlayer().sendMessage(prefix + line);
+							}
+							try
+							{					
+								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.not-enough-xp-sound").toUpperCase()), 5, 5);
+							}
+							catch(IllegalArgumentException ex)
+							{
+								for(String line : messagesFile.getStringList("errors.invalid-sound"))
+								{
+									line = line.replace("{sound}", configsFile.getString("sounds.not-enough-xp-sound"));
+									line = ChatColor.translateAlternateColorCodes('&', line);
+									main.getLogger().warning(line);
+								}
+							}
+							break;
+						}
 						playerInterface.setClosedInventory(true);
 						try
 						{					
@@ -1414,7 +1292,7 @@ public class UnEnchanter implements Listener
 						break;
 					default:
 						break;
-				}	
+				}
 			}
 			//endregion
 		}
