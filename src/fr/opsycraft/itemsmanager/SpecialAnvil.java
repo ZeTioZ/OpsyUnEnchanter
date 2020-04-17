@@ -17,14 +17,12 @@ public class SpecialAnvil
 {
 	
 	private ItemStack specialAnvilItem;
-	private Main main;
 	private YamlConfiguration configsFile;
 	
 	
 	public SpecialAnvil(Main main) 
 	{
-		this.main = main;
-		configsFile = this.main.getCustomConfigs().getConfigsFile();
+		configsFile = main.getCustomConfigs().getConfigsFile();
 		
 		this.specialAnvilItem = new ItemStack(Material.ANVIL);
 		ItemMeta specialAnvilMeta = specialAnvilItem.getItemMeta();

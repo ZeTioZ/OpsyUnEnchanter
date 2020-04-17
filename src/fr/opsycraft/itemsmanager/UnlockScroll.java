@@ -24,7 +24,6 @@ public class UnlockScroll implements Listener
 {
 	
 	private ItemStack unlockScrollItem;
-	private Main main;
 	private YamlConfiguration configsFile;
 	private YamlConfiguration messagesFile;
 	private String prefix;
@@ -32,9 +31,8 @@ public class UnlockScroll implements Listener
 	
 	public UnlockScroll(Main main) 
 	{
-		this.main = main;
-		configsFile = this.main.getCustomConfigs().getConfigsFile();
-		messagesFile = this.main.getCustomConfigs().getMessagesFile();
+		configsFile = main.getCustomConfigs().getConfigsFile();
+		messagesFile = main.getCustomConfigs().getMessagesFile();
 		prefix = ChatColor.translateAlternateColorCodes('&', this.messagesFile.getString("prefix"));
 		
 		this.unlockScrollItem = new ItemStack(Material.valueOf(configsFile.getString("items.unlock-scroll.material")));
