@@ -794,34 +794,7 @@ public class UnEnchanter implements Listener
 			itemS.setItemMeta(itemSMeta);
 			inv.setItem(whichSlot, itemS);
 			playerInterface.getEnchantedBook().setItemMeta(bookStorage);
-			int emeraldLevels = 0;
-			for(ItemStack emeraldSelected : inv.getContents())
-			{
-				if(emeraldSelected.getType() == Material.PAPER
-					&& emeraldSelected.getItemMeta().getDisplayName().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("less-5-interface.enchantment-selected-name"))))
-				{
-					for(Enchantment ench : emeraldSelected.getEnchantments().keySet())
-					{
-						emeraldLevels += emeraldSelected.getEnchantments().get(ench);
-					}
-				}
-			}
-			int enchants = playerInterface.getSelectedEnchants();
-			int enchantsLevel = emeraldLevels;
-			double result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
-			ItemStack uIEnchantedBook = playerInterface.getEnchantedBook();
-			ItemMeta uIEnchantedBookMeta = uIEnchantedBook.getItemMeta();
-			List<String> uIEnchantedBookLore = new ArrayList<>();
-			uIEnchantedBookLore.add(" ");
-			for(String line : configsFile.getStringList("less-5-interface.enchantment-price-lore"))
-			{
-				line = ChatColor.translateAlternateColorCodes('&', line);
-				line = line.replace("{price}", String.valueOf(result));
-				uIEnchantedBookLore.add(line);
-			}
-			uIEnchantedBookMeta.setLore(uIEnchantedBookLore);
-			uIEnchantedBook.setItemMeta(uIEnchantedBookMeta);
-			inv.setItem(16, uIEnchantedBook);
+			bookUpdate(playerInterface, inv);
 		}
 		else if(itemS.getType() == Material.PAPER)
 		{
@@ -851,36 +824,42 @@ public class UnEnchanter implements Listener
 			}
 			else
 			{
-				int emeraldLevels = 0;
-				for(ItemStack emeraldSelected : inv.getContents())
-				{
-					if(emeraldSelected.getType() == Material.PAPER
-						&& emeraldSelected.getItemMeta().getDisplayName().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("less-5-interface.enchantment-selected-name"))))
-					{
-						for(Enchantment ench : emeraldSelected.getEnchantments().keySet())
-						{
-							emeraldLevels += emeraldSelected.getEnchantments().get(ench);
-						}
-					}
-				}
-				int enchants = playerInterface.getSelectedEnchants();
-				int enchantsLevel = emeraldLevels;
-				double result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
-				ItemStack uIEnchantedBook = playerInterface.getEnchantedBook();
-				ItemMeta uIEnchantedBookMeta = uIEnchantedBook.getItemMeta();
-				List<String> uIEnchantedBookLore = new ArrayList<>();
-				uIEnchantedBookLore.add(" ");
-				for(String line : configsFile.getStringList("less-5-interface.enchantment-price-lore"))
-				{
-					line = ChatColor.translateAlternateColorCodes('&', line);
-					line = line.replace("{price}", String.valueOf(result));
-					uIEnchantedBookLore.add(line);
-				}
-				uIEnchantedBookMeta.setLore(uIEnchantedBookLore);
-				uIEnchantedBook.setItemMeta(uIEnchantedBookMeta);
-				inv.setItem(16, uIEnchantedBook);
+				bookUpdate(playerInterface, inv);
 			}
 		}
+	}
+	//endregion
+
+	//region Book Update
+	private void bookUpdate(IndividualInterface playerInterface, Inventory inv) {
+		int emeraldLevels = 0;
+		for(ItemStack emeraldSelected : inv.getContents())
+		{
+			if(emeraldSelected.getType() == Material.PAPER
+				&& emeraldSelected.getItemMeta().getDisplayName().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("less-5-interface.enchantment-selected-name"))))
+			{
+				for(Enchantment ench : emeraldSelected.getEnchantments().keySet())
+				{
+					emeraldLevels += emeraldSelected.getEnchantments().get(ench);
+				}
+			}
+		}
+		int enchants = playerInterface.getSelectedEnchants();
+		int enchantsLevel = emeraldLevels;
+		double result = Math.round(200.0 * (enchants * (1.0 + (enchantsLevel/10.0))));
+		ItemStack uIEnchantedBook = playerInterface.getEnchantedBook();
+		ItemMeta uIEnchantedBookMeta = uIEnchantedBook.getItemMeta();
+		List<String> uIEnchantedBookLore = new ArrayList<>();
+		uIEnchantedBookLore.add(" ");
+		for(String line : configsFile.getStringList("less-5-interface.enchantment-price-lore"))
+		{
+			line = ChatColor.translateAlternateColorCodes('&', line);
+			line = line.replace("{price}", String.valueOf(result));
+			uIEnchantedBookLore.add(line);
+		}
+		uIEnchantedBookMeta.setLore(uIEnchantedBookLore);
+		uIEnchantedBook.setItemMeta(uIEnchantedBookMeta);
+		inv.setItem(16, uIEnchantedBook);
 	}
 	//endregion
 	
@@ -912,20 +891,7 @@ public class UnEnchanter implements Listener
 				playerInterface.setCatalyzerLevel(1);
 				catalyzerLevelString = "I";
 			}
-			double baseCost = configsFile.getDouble("catalyzer-base-price"); // Same
-			double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
-			int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
-			List<String> catalyzerLore = new ArrayList<>();
-			catalyzerLore.add(catalyzerLevelString);
-			for(String line: configsFile.getStringList("more-5-interface.price-lore"))
-			{
-				line = ChatColor.translateAlternateColorCodes('&', line);
-				line = line.replace("{price}", String.valueOf(costFormula));
-				catalyzerLore.add(line);
-			}
-			catalyzerMeta.setLore(catalyzerLore);
-			catalyzer.setItemMeta(catalyzerMeta);
-			p.updateInventory();
+			catalyzerUpdate(p, catalyzer, catalyzerMeta, catalyzerLevel, catalyzerLevelString);
 		}
 	}
 	//endregion
@@ -958,21 +924,28 @@ public class UnEnchanter implements Listener
 				playerInterface.setCatalyzerLevel(4);
 				catalyzerLevelString = "IIII";
 			}
-			double baseCost = configsFile.getDouble("catalyzer-base-price");
-			double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
-			int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
-			List<String> catalyzerLore = new ArrayList<>();
-			catalyzerLore.add(catalyzerLevelString);
-			for(String line: configsFile.getStringList("more-5-interface.price-lore"))
-			{
-				line = ChatColor.translateAlternateColorCodes('&', line);
-				line = line.replace("{price}", String.valueOf(costFormula));
-				catalyzerLore.add(line);
-			}
-			catalyzerMeta.setLore(catalyzerLore);
-			catalyzer.setItemMeta(catalyzerMeta);
-			p.updateInventory();
+			catalyzerUpdate(p, catalyzer, catalyzerMeta, catalyzerLevel, catalyzerLevelString);
 		}
+	}
+	//endregion
+	
+	//region Catalyzer Update
+	private void catalyzerUpdate(Player p, ItemStack catalyzer, ItemMeta catalyzerMeta, int catalyzerLevel, String catalyzerLevelString)
+	{
+		double baseCost = configsFile.getDouble("catalyzer-base-price");
+		double levelMultiplier = configsFile.getDouble("catalyzer-level-multiplier");
+		int costFormula = (int) (Math.floor(baseCost * levelMultiplier * catalyzerLevel));
+		List<String> catalyzerLore = new ArrayList<>();
+		catalyzerLore.add(catalyzerLevelString);
+		for(String line: configsFile.getStringList("more-5-interface.price-lore"))
+		{
+			line = ChatColor.translateAlternateColorCodes('&', line);
+			line = line.replace("{price}", String.valueOf(costFormula));
+			catalyzerLore.add(line);
+		}
+		catalyzerMeta.setLore(catalyzerLore);
+		catalyzer.setItemMeta(catalyzerMeta);
+		p.updateInventory();
 	}
 	//endregion
 	
