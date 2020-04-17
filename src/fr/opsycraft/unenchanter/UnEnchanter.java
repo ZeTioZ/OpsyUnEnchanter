@@ -73,11 +73,11 @@ public class UnEnchanter implements Listener
 	}
 	//endregion
 	
-	//region Event de placement de l'enclume spéciale
+	//region Event de placement de l'enclume spÃ©ciale
 	@EventHandler
 	public void onSpecialAnvilPlaced(BlockPlaceEvent e) 
 	{
-		ItemStack itemInHand = e.getPlayer().getItemInHand();
+		ItemStack itemInHand = e.getPlayer().getInventory().getItemInHand();
 		if(itemInHand != null && itemInHand.getType() == Material.ANVIL
 			&& itemInHand.getItemMeta().getLore() != null
 			&& itemInHand.getItemMeta().getLore().equals(specialAnvil.getItemMeta().getLore())
@@ -85,10 +85,7 @@ public class UnEnchanter implements Listener
 		{
 			Block underBlock = e.getBlock().getLocation().add(0, -1, 0).getBlock();
 			Player p = e.getPlayer();
-			if(underBlock.getType() != null 
-			   && (underBlock.getType() == Material.AIR
-			    || underBlock.getType() == Material.STATIONARY_LAVA
-			    || underBlock.getType() == Material.STATIONARY_WATER))
+			if(configsFile.getStringList("block-under-place").contains(underBlock.getType().toString()))
 			{
 				e.setCancelled(true);
 				for(String line : messagesFile.getStringList("errors.must-be-block-under"))
@@ -97,10 +94,7 @@ public class UnEnchanter implements Listener
 					p.sendMessage(prefix + line);
 				}
 			}
-			else if(underBlock.getType() != null 
-					&& (underBlock.getType() == Material.GRAVEL
-					 || underBlock.getType() == Material.SAND
-					 || underBlock.getType() == Material.DOUBLE_PLANT))
+			else if(configsFile.getStringList("block-under-empty-place").contains(underBlock.getType().toString()))
 			{
 				e.setCancelled(true);
 				for(String line : messagesFile.getStringList("errors.cant-be-sand-or-gravel-or-plant"))
@@ -118,7 +112,7 @@ public class UnEnchanter implements Listener
 				}
 				else
 				{
-					for(String line : messagesFile.getStringList("errors-not-enought-permissions"))
+					for(String line : messagesFile.getStringList("errors-not-enough-permissions"))
 					{
 						line = ChatColor.translateAlternateColorCodes('&', line);
 						p.sendMessage(prefix + line);
@@ -129,7 +123,7 @@ public class UnEnchanter implements Listener
 	}
 	//endregion
 	
-	//region Event d'intéraction de l'enclume spéciale
+	//region Event d'intÃ©raction de l'enclume spÃ©ciale
 	@EventHandler
 	public void onSpecialAnvilRightclicked(PlayerInteractEvent e)
 	{
@@ -141,9 +135,9 @@ public class UnEnchanter implements Listener
 			{
 				e.setCancelled(true);
 				Player p = e.getPlayer();
-				if(configsFile.getBoolean("use-permission") || p.hasPermission("opsyunenchanter.use"))
-				{						
-					ItemStack itemToUnEnchant = p.getItemInHand();
+				if(!configsFile.getBoolean("use-permission") || (configsFile.getBoolean("use-permission") && p.hasPermission("opsyunenchanter.use")))
+				{		
+					ItemStack itemToUnEnchant = p.getInventory().getItemInHand();
 					if(itemToUnEnchant != null && itemToUnEnchant.getType() != Material.AIR) 
 					{
 						if(itemToUnEnchant.getItemMeta().getLore() != null && itemToUnEnchant.getItemMeta().getLore().contains(ChatColor.translateAlternateColorCodes('&', configsFile.getString("locked-item-lore"))))
@@ -175,7 +169,7 @@ public class UnEnchanter implements Listener
 											newItemLore.remove(i - 1);
 											newItemMeta.setLore(newItemLore);
 											itemToUnEnchant.setItemMeta(newItemMeta);
-											p.setItemInHand(itemToUnEnchant);
+											p.getInventory().setItemInHand(itemToUnEnchant);
 										}
 										i++;
 									}
@@ -200,13 +194,13 @@ public class UnEnchanter implements Listener
 						playersInterfaces.put(p, new IndividualInterface(p));
 						IndividualInterface playerInterface = playersInterfaces.get(p);
 						Map<Enchantment, Integer> itemEnchants = itemToUnEnchant.getEnchantments();
-						if(itemEnchants.keySet().isEmpty())
+						if(!itemEnchants.keySet().isEmpty())
 						{
 							Bukkit.getScheduler().scheduleSyncDelayedTask(main.getPlugin(), new Runnable() {
 								public void run() {
 									playerInterface.setFirstInterfaceChoice(firstInterfaceChoise(playerInterface.getPlayer(), playerInterface.getItemToUnenchant()));
 									playerInterface.setOpenedAnvilLoc(e.getClickedBlock().getLocation());
-									playerInterface.getPlayer().setItemInHand(null);
+									playerInterface.getPlayer().getInventory().setItemInHand(null);
 								}
 							}, 2L);
 						}
@@ -230,7 +224,7 @@ public class UnEnchanter implements Listener
 				}
 				else
 				{
-					for(String line : messagesFile.getStringList("errors.not-enought-permission"))
+					for(String line : messagesFile.getStringList("errors.not-enough-permission"))
 					{
 						line = ChatColor.translateAlternateColorCodes('&', line);
 						p.sendMessage(prefix + line);
@@ -241,14 +235,27 @@ public class UnEnchanter implements Listener
 	}
 	//endregion
 	
-	//region Fonction de récupération de l'item après fermeture inopiné de l'inventaire
+	//region Fonction de rÃ©cupÃ©ration de l'item aprÃ¨s fermeture inopinÃ©e de l'inventaire
 	private void giveUnEnchantedItemBack(Player p, ItemStack itemToUnEnchant, Boolean forOpti) //Fonction pour savoir si quand l'interface se ferme il faut rendre l'item ou pas
 	{
 		IndividualInterface playerInterface = playersInterfaces.get(p);
-		if(playerInterface.getClosedInventory())
+		if(!playerInterface.getClosedInventory())
 		{
 			if(!forOpti) {
-				p.playSound(p.getLocation(), Sound.valueOf(configsFile.getString("sounds.anvil-close-sound")), 5, 5);
+				try
+				{
+					
+					p.playSound(p.getLocation(), Sound.valueOf(configsFile.getString("sounds.anvil-close-sound").toUpperCase()), 5, 5);
+				}
+				catch(IllegalArgumentException ex)
+				{
+					for(String line : messagesFile.getStringList(""))
+					{
+						line = line.replace("{sound}", configsFile.getString("sounds.anvil-close-sound"));
+						line = ChatColor.translateAlternateColorCodes('&', line);
+						main.getLogger().warning(line);
+					}
+				}
 			}
 			if(p.getInventory().firstEmpty() != -1)
 			{
@@ -260,7 +267,7 @@ public class UnEnchanter implements Listener
 			}
 		}
 		else
-		{				
+		{	
 			playerInterface.setClosedInventory(false);
 		}
 	}
@@ -277,8 +284,7 @@ public class UnEnchanter implements Listener
 			ItemStack pItem = playerInterface.getItemToUnenchant();
 			if(e.getInventory() != null && e.getInventory().equals(playerInterface.getFirstInterfaceChoice())) 
 			{
-				giveUnEnchantedItemBack((Player) e.getPlayer(), pItem, false);
-				playersInterfaces.get(p).setOpenedAnvilLoc(null);
+				giveUnEnchantedItemBack(p, pItem, false);
 			}
 			
 			else if((e.getInventory() != null && playerInterface.getUnEnchanterChooseInterface() != null
@@ -293,28 +299,97 @@ public class UnEnchanter implements Listener
 	}
 	//endregion
 	
-	//region Première interface (Choix)
-	private Inventory firstInterfaceChoise(Player player, ItemStack playerItem) // Interface N°1
+	//region PremiÃ¨re interface (Choix)
+	private Inventory firstInterfaceChoise(Player player, ItemStack playerItem) // Interface 1
 	{
 		Inventory firstInterface =  Bukkit.createInventory(player, 27, ChatColor.translateAlternateColorCodes('&', configsFile.getString("first-interface.name")));
-		
-		ItemStack redGlassPane = new ItemStack(Material.STAINED_GLASS_PANE, 1,(byte) 14);
+		ItemStack redGlassPane;
+		try
+		{			
+			redGlassPane = new ItemStack(Material.valueOf(configsFile.getString("first-interface.refuse-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			redGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("first-interface.refuse-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta redGlassPaneMeta = redGlassPane.getItemMeta();
 		redGlassPaneMeta.setDisplayName(" ");
 		redGlassPane.setItemMeta(redGlassPaneMeta);
-		ItemStack blueGlassPane = new ItemStack(Material.STAINED_GLASS_PANE, 1,(byte) 11);
+		ItemStack blueGlassPane;
+		try
+		{
+			blueGlassPane = new ItemStack(Material.valueOf(configsFile.getString("first-interface.middle-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			blueGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("first-interface.middle-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta blueGlassPaneMeta = blueGlassPane.getItemMeta();
 		blueGlassPaneMeta.setDisplayName(" ");
 		blueGlassPane.setItemMeta(blueGlassPaneMeta);
-		ItemStack greenGlassPane = new ItemStack(Material.STAINED_GLASS_PANE, 1,(byte) 13);
+		ItemStack greenGlassPane;
+		try
+		{
+			greenGlassPane = new ItemStack(Material.valueOf(configsFile.getString("first-interface.accept-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			greenGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("first-interface.accept-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta greenGlassPaneMeta = greenGlassPane.getItemMeta();
 		greenGlassPaneMeta.setDisplayName(" ");
 		greenGlassPane.setItemMeta(greenGlassPaneMeta);
-		ItemStack redWool = new ItemStack(Material.WOOL, 1, (byte) 14);
+		ItemStack redWool;
+		try
+		{			
+			redWool = new ItemStack(Material.valueOf(configsFile.getString("first-interface.refuse-button-item").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			redWool = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("first-interface.refuse-button-item"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta redWoolMeta = redWool.getItemMeta();
 		redWoolMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', configsFile.getString("first-interface.refuse-button-name")));
 		redWool.setItemMeta(redWoolMeta);
-		ItemStack greenWool = new ItemStack(Material.WOOL, 1, (byte) 5);
+		ItemStack greenWool;
+		try
+		{
+			greenWool = new ItemStack(Material.valueOf(configsFile.getString("first-interface.accept-button-item").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			greenWool = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("first-interface.accept-button-item"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta greenWoolMeta = greenWool.getItemMeta();
 		greenWoolMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', configsFile.getString("first-interface.accept-button-name")));
 		List<String> greenWoolLore = new ArrayList<>();
@@ -380,19 +455,75 @@ public class UnEnchanter implements Listener
 		
 		IndividualInterface playerInterface = playersInterfaces.get(player);
 		
-		ItemStack whiteGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 0);
+		ItemStack whiteGlassPane;
+		try
+		{
+			whiteGlassPane = new ItemStack(Material.valueOf(configsFile.getString("less-5-interface.first-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			whiteGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("less-5-interface.first-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta whiteGlassPaneMeta = whiteGlassPane.getItemMeta();
 		whiteGlassPaneMeta.setDisplayName(" ");
 		whiteGlassPane.setItemMeta(whiteGlassPaneMeta);
-		ItemStack blueGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 11);
+		ItemStack blueGlassPane;
+		try
+		{
+			blueGlassPane = new ItemStack(Material.valueOf(configsFile.getString("less-5-interface.first-middle-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			blueGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("less-5-interface.first-middle-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta blueGlassPaneMeta = blueGlassPane.getItemMeta();
 		blueGlassPaneMeta.setDisplayName(" ");
 		blueGlassPane.setItemMeta(blueGlassPaneMeta);
-		ItemStack yellowGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 4);
+		ItemStack yellowGlassPane;
+		try
+		{
+			yellowGlassPane = new ItemStack(Material.valueOf(configsFile.getString("less-5-interface.second-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			yellowGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("less-5-interface.second-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta yellowGlassPaneMeta = yellowGlassPane.getItemMeta();
 		yellowGlassPaneMeta.setDisplayName(" ");
 		yellowGlassPane.setItemMeta(yellowGlassPaneMeta);
-		ItemStack blackGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 15);
+		ItemStack blackGlassPane;
+		try
+		{
+			blackGlassPane = new ItemStack(Material.valueOf(configsFile.getString("less-5-interface.second-middle-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			blackGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("less-5-interface.second-middle-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta blackGlassPaneMeta = blackGlassPane.getItemMeta();
 		blackGlassPaneMeta.setDisplayName(" ");
 		blackGlassPane.setItemMeta(blackGlassPaneMeta);
@@ -472,26 +603,82 @@ public class UnEnchanter implements Listener
 	}
 	//endregion
 	
-	//region Troisième interface (Choix random > 5 enchants)
-	private Inventory unEnchanterInterfaceRandom(Player player, ItemStack playerItem) // Interface plus ou égal de 5 enchants
+	//region TroisiÃ¨me interface (Choix random > 5 enchants)
+	private Inventory unEnchanterInterfaceRandom(Player player, ItemStack playerItem) // Interface plus ou ï¿½gal de 5 enchants
 	{
 		Inventory unEnchantInterfaceRandom =  Bukkit.createInventory(player, 27, ChatColor.translateAlternateColorCodes('&', configsFile.getString("more-5-interface.name")));
 		
 		IndividualInterface playerInterface = playersInterfaces.get(player);
 		
-		ItemStack whiteGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 0);
+		ItemStack whiteGlassPane;
+		try
+		{
+			whiteGlassPane = new ItemStack(Material.valueOf(configsFile.getString("more-5-interface.first-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			whiteGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("more-5-interface.first-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta whiteGlassPaneMeta = whiteGlassPane.getItemMeta();
 		whiteGlassPaneMeta.setDisplayName(" ");
 		whiteGlassPane.setItemMeta(whiteGlassPaneMeta);
-		ItemStack blueGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 11);
+		ItemStack blueGlassPane;
+		try
+		{
+			blueGlassPane = new ItemStack(Material.valueOf(configsFile.getString("more-5-interface.first-middle-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			blueGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("more-5-interface.first-middle-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta blueGlassPaneMeta = blueGlassPane.getItemMeta();
 		blueGlassPaneMeta.setDisplayName(" ");
 		blueGlassPane.setItemMeta(blueGlassPaneMeta);
-		ItemStack yellowGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 4);
+		ItemStack yellowGlassPane;
+		try
+		{
+			yellowGlassPane = new ItemStack(Material.valueOf(configsFile.getString("more-5-interface.second-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			yellowGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("more-5-interface.second-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta yellowGlassPaneMeta = yellowGlassPane.getItemMeta();
 		yellowGlassPaneMeta.setDisplayName(" ");
 		yellowGlassPane.setItemMeta(yellowGlassPaneMeta);
-		ItemStack blackGlassPane = new ItemStack(Material.STAINED_GLASS_PANE ,1 ,(byte) 15);
+		ItemStack blackGlassPane;
+		try
+		{
+			blackGlassPane = new ItemStack(Material.valueOf(configsFile.getString("more-5-interface.second-middle-decoration").toUpperCase()));
+		}
+		catch(IllegalArgumentException ex)
+		{
+			blackGlassPane = new ItemStack(Material.BARRIER);
+			for(String line : messagesFile.getStringList("errors.invalid-material"))
+			{
+				line = line.replace("{material}", configsFile.getString("more-5-interface.second-middle-decoration"));
+				line = ChatColor.translateAlternateColorCodes('&', line);
+				main.getLogger().warning(line);
+			}
+		}
 		ItemMeta blackGlassPaneMeta = blackGlassPane.getItemMeta();
 		blackGlassPaneMeta.setDisplayName(" ");
 		blackGlassPane.setItemMeta(blackGlassPaneMeta);
@@ -566,10 +753,34 @@ public class UnEnchanter implements Listener
 				{
 					playerInterface.getPlayer().sendMessage(prefix + ChatColor.translateAlternateColorCodes('&', line));
 				}
-				playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.less-5-interface.already-max-enchants-sound")), 5, 5);
+				try
+				{					
+					playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.less-5-interface.already-max-enchants-sound").toUpperCase()), 5, 5);
+				}
+				catch(IllegalArgumentException ex)
+				{
+					for(String line : messagesFile.getStringList("errors.invalid-sound"))
+					{
+						line = line.replace("{sound}", configsFile.getString("sounds.less-5-interface.already-max-enchants-sound"));
+						line = ChatColor.translateAlternateColorCodes('&', line);
+						main.getLogger().warning(line);
+					}
+				}
 				return;
 			}
-			playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.less-5-interface.select-enchant-sound")), 5, 5);
+			try
+			{					
+				playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.less-5-interface.select-enchant-sound").toUpperCase()), 5, 5);
+			}
+			catch(IllegalArgumentException ex)
+			{
+				for(String line : messagesFile.getStringList("errors.invalid-sound"))
+				{
+					line = line.replace("{sound}", configsFile.getString("sounds.less-5-interface.select-enchant-sound"));
+					line = ChatColor.translateAlternateColorCodes('&', line);
+					main.getLogger().warning(line);
+				}
+			}
 			playerInterface.setSelectedEnchants(playerInterface.getSelectedEnchants() + 1);
 			itemS = new ItemStack(Material.PAPER);
 			ItemMeta itemSMeta = itemS.getItemMeta();
@@ -614,7 +825,19 @@ public class UnEnchanter implements Listener
 		}
 		else if(itemS.getType() == Material.PAPER)
 		{
-			playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.less-5-interface.unselect-enchant-sound")), 5, 5);
+			try
+			{					
+				playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.less-5-interface.unselect-enchant-sound").toUpperCase()), 5, 5);
+			}
+			catch(IllegalArgumentException ex)
+			{
+				for(String line : messagesFile.getStringList("errors.invalid-sound"))
+				{
+					line = line.replace("{sound}", configsFile.getString("sounds.less-5-interface.unselect-enchant-sound"));
+					line = ChatColor.translateAlternateColorCodes('&', line);
+					main.getLogger().warning(line);
+				}
+			}
 			playerInterface.setSelectedEnchants(playerInterface.getSelectedEnchants() - 1);
 			itemS = playerInterface.getEmeraldMap().get(playerInterface.getEmeraldMap().size() - whichEmerald);
 			EnchantmentStorageMeta bookStorage = (EnchantmentStorageMeta) playerInterface.getEnchantedBook().getItemMeta();
@@ -777,7 +1000,7 @@ public class UnEnchanter implements Listener
 			}
 			else
 			{
-				p.sendMessage("§cAn error occured ! Please contact the server administrator. ERROR CODE: #781");
+				p.sendMessage("&cAn error occured ! Please contact the server administrator. ERROR CODE: #781");
 			}
 		}
 	}
@@ -878,14 +1101,38 @@ public class UnEnchanter implements Listener
 						line = ChatColor.translateAlternateColorCodes('&', line);
 						e.getWhoClicked().sendMessage(prefix + line);
 					}
-					((Player)e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.anvil-close-sound")), 5, 5);
+					try
+					{					
+						((Player)e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.anvil-close-sound").toUpperCase()), 5, 5);
+					}
+					catch(IllegalArgumentException ex)
+					{
+						for(String line : messagesFile.getStringList("errors.invalid-sound"))
+						{
+							line = line.replace("{sound}", configsFile.getString("sounds.anvil-close-sound"));
+							line = ChatColor.translateAlternateColorCodes('&', line);
+							main.getLogger().warning(line);
+						}
+					}
 					break;
 				case 16:	
 					if(playerInterface.getItemEnchantsSet().size() < 5)
 					{
 						playerInterface.setClosedInventory(true);
 						p.closeInventory();
-						((Player)e.getWhoClicked()).getWorld().playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.first-interface.accept-click-sound")), 5, 5);
+						try
+						{					
+							((Player)e.getWhoClicked()).getWorld().playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.first-interface.accept-click-sound").toUpperCase()), 5, 5);
+						}
+						catch(IllegalArgumentException ex)
+						{
+							for(String line : messagesFile.getStringList("errors.invalid-sound"))
+							{
+								line = line.replace("{sound}", configsFile.getString("sounds.first-interface.accept-click-sound"));
+								line = ChatColor.translateAlternateColorCodes('&', line);
+								main.getLogger().warning(line);
+							}
+						}
 						Bukkit.getScheduler().scheduleSyncDelayedTask(main.getPlugin(), new Runnable() {
 				            public void run() {
 				            	playerInterface.setUnEnchanterChooseInterface(unEnchanterChooseInterface(p, pItem));
@@ -896,7 +1143,19 @@ public class UnEnchanter implements Listener
 					{
 						playerInterface.setClosedInventory(true);
 						p.closeInventory();
-						((Player)e.getWhoClicked()).getWorld().playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.first-interface.accept-click-sound")), 5, 5);
+						try
+						{					
+							((Player)e.getWhoClicked()).getWorld().playSound(e.getWhoClicked().getLocation(), Sound.valueOf(configsFile.getString("sounds.first-interface.accept-click-sound").toUpperCase()), 5, 5);
+						}
+						catch(IllegalArgumentException ex)
+						{
+							for(String line : messagesFile.getStringList("errors.invalid-sound"))
+							{
+								line = line.replace("{sound}", configsFile.getString("sounds.first-interface.accept-click-sound"));
+								line = ChatColor.translateAlternateColorCodes('&', line);
+								main.getLogger().warning(line);
+							}
+						}
 						Bukkit.getScheduler().scheduleSyncDelayedTask(main.getPlugin(), new Runnable() {
 				            public void run() {
 				            	playerInterface.setUnEnchanterInterfaceRandom(unEnchanterInterfaceRandom(p, pItem));
@@ -994,12 +1253,36 @@ public class UnEnchanter implements Listener
 										line = line.replace("{price}", String.valueOf(Math.round((result - pExp))));
 										playerInterface.getPlayer().sendMessage(prefix + line);
 									}
-									playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.not-enough-xp-sound")), 5, 5);
+									try
+									{					
+										playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.not-enough-xp-sound").toUpperCase()), 5, 5);
+									}
+									catch(IllegalArgumentException ex)
+									{
+										for(String line : messagesFile.getStringList("errors.invalid-sound"))
+										{
+											line = line.replace("{sound}", configsFile.getString("sounds.not-enough-xp-sound"));
+											line = ChatColor.translateAlternateColorCodes('&', line);
+											main.getLogger().warning(line);
+										}
+									}
 									break;
 								}
 							}
 							playerInterface.setClosedInventory(true);
-							playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.unenchantment-done-sound")), 5, 5);
+							try
+							{					
+								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.unenchantment-done-sound").toUpperCase()), 5, 5);
+							}
+							catch(IllegalArgumentException ex)
+							{
+								for(String line : messagesFile.getStringList("errors.invalid-sound"))
+								{
+									line = line.replace("{sound}", configsFile.getString("sounds.unenchantment-done-sound"));
+									line = ChatColor.translateAlternateColorCodes('&', line);
+									main.getLogger().warning(line);
+								}
+							}
 							playerInterface.getPlayer().closeInventory();
 							break;
 						default:
@@ -1019,14 +1302,38 @@ public class UnEnchanter implements Listener
 					case 13:
 						if(e.getClick().isLeftClick())
 						{
-							playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.increment-catalyzer-level-sound")), 5, 5);
+							try
+							{					
+								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.increment-catalyzer-level-sound").toUpperCase()), 5, 5);
+							}
+							catch(IllegalArgumentException ex)
+							{
+								for(String line : messagesFile.getStringList("errors.invalid-sound"))
+								{
+									line = line.replace("{sound}", configsFile.getString("sounds.more-5-interface.increment-catalyzer-level-sound"));
+									line = ChatColor.translateAlternateColorCodes('&', line);
+									main.getLogger().warning(line);
+								}
+							}
 							incrementCatalyzerLevel((Player)e.getWhoClicked(), e.getCurrentItem());
 							onRandomPick(p, playerInterface.getItemEnchants(), false);
 							break;								
 						}
 						else if(e.getClick().isRightClick())
 						{
-							playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.decrement-catalyzer-level-sound")), 5, 5);
+							try
+							{					
+								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.more-5-interface.decrement-catalyzer-level-sound").toUpperCase()), 5, 5);
+							}
+							catch(IllegalArgumentException ex)
+							{
+								for(String line : messagesFile.getStringList("errors.invalid-sound"))
+								{
+									line = line.replace("{sound}", configsFile.getString("sounds.more-5-interface.decrement-catalyzer-level-sound"));
+									line = ChatColor.translateAlternateColorCodes('&', line);
+									main.getLogger().warning(line);
+								}
+							}
 							decrementCatalyzerLevel((Player) e.getWhoClicked(), e.getCurrentItem());
 							onRandomPick(p, playerInterface.getItemEnchants(), true);
 							break;
@@ -1074,11 +1381,35 @@ public class UnEnchanter implements Listener
 									line = line.replace("{price}", String.valueOf(Math.round((result - pExp))));
 									playerInterface.getPlayer().sendMessage(prefix + line);
 								}
-								playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.not-enough-xp-sound")), 5, 5);
+								try
+								{					
+									playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.not-enough-xp-sound").toUpperCase()), 5, 5);
+								}
+								catch(IllegalArgumentException ex)
+								{
+									for(String line : messagesFile.getStringList("errors.invalid-sound"))
+									{
+										line = line.replace("{sound}", configsFile.getString("sounds.not-enough-xp-sound"));
+										line = ChatColor.translateAlternateColorCodes('&', line);
+										main.getLogger().warning(line);
+									}
+								}
 								break;
 							}
 						playerInterface.setClosedInventory(true);
-						playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.unenchantment-done-sound")), 5, 5);
+						try
+						{					
+							playerInterface.getPlayer().playSound(playerInterface.getPlayer().getLocation(), Sound.valueOf(configsFile.getString("sounds.unenchantment-done-sound").toUpperCase()), 5, 5);
+						}
+						catch(IllegalArgumentException ex)
+						{
+							for(String line : messagesFile.getStringList("errors.invalid-sound"))
+							{
+								line = line.replace("{sound}", configsFile.getString("sounds.unenchantment-done-sound"));
+								line = ChatColor.translateAlternateColorCodes('&', line);
+								main.getLogger().warning(line);
+							}
+						}
 						playerInterface.getPlayer().closeInventory();
 						break;
 					default:
@@ -1115,13 +1446,25 @@ public class UnEnchanter implements Listener
 							}
 						}
 					}
-					e.getPlayer().getWorld().playSound(e.getBlock().getLocation(), Sound.valueOf(configsFile.getString("sounds.anvil-break-sound")), 5, 5);
+					try
+					{					
+						e.getPlayer().getWorld().playSound(e.getBlock().getLocation(), Sound.valueOf(configsFile.getString("sounds.anvil-break-sound").toUpperCase()), 5, 5);
+					}
+					catch(IllegalArgumentException ex)
+					{
+						for(String line : messagesFile.getStringList("errors.invalid-sound"))
+						{
+							line = line.replace("{sound}", configsFile.getString("sounds.anvil-break-sound"));
+							line = ChatColor.translateAlternateColorCodes('&', line);
+							main.getLogger().warning(line);
+						}
+					}
 					e.getBlock().setType(Material.AIR);
 					e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), specialAnvil);
 				}
 				else
 				{
-					for(String line : messagesFile.getStringList("errors.not-enought-permissions"))
+					for(String line : messagesFile.getStringList("errors.not-enough-permissions"))
 					{
 						line = ChatColor.translateAlternateColorCodes('&', line);
 						e.getPlayer().sendMessage(prefix + line);
@@ -1172,7 +1515,19 @@ public class UnEnchanter implements Listener
 								}
 							}
 						}
-						blockToCheck.getWorld().playSound(brokenAnvilLoc, Sound.valueOf(configsFile.getString("sounds.anvil-break-sound")), 5, 5);
+						try
+						{					
+							blockToCheck.getWorld().playSound(brokenAnvilLoc, Sound.valueOf(configsFile.getString("sounds.anvil-break-sound").toUpperCase()), 5, 5);
+						}
+						catch(IllegalArgumentException ex)
+						{
+							for(String line : messagesFile.getStringList("errors.invalid-sound"))
+							{
+								line = line.replace("{sound}", configsFile.getString("sounds.anvil-break-sound"));
+								line = ChatColor.translateAlternateColorCodes('&', line);
+								main.getLogger().warning(line);
+							}
+						}
 						blockToCheck.setType(Material.AIR);
 						blockToCheck.getWorld().dropItemNaturally(brokenAnvilLoc, specialAnvil);
 					}

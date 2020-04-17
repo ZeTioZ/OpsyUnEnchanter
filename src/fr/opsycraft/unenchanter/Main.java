@@ -1,8 +1,6 @@
 package fr.opsycraft.unenchanter;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -18,7 +16,8 @@ public class Main extends JavaPlugin implements Listener {
 	private Plugin plugin;
 	private CustomConfigs customConfigs;
 	private UnEnchanter unenchanter;
-	private List<Recipe> recipesBackup = new ArrayList<>();
+	private UnlockScroll unlockScroll;
+	private SpecialAnvil specialAnvil;
 	
 	@Override
 	public void onEnable()
@@ -34,18 +33,10 @@ public class Main extends JavaPlugin implements Listener {
 		customConfigs.reloadDatabaseFile();
 		//endregion
 		
-		//region Saving the previous recipes list
-		Iterator<Recipe> a = Bukkit.getServer().recipeIterator();
-		while(a.hasNext())
-		{
-			Recipe recipe = a.next();
-			recipesBackup.add(recipe);
-		}
-		//endregion
-		
-		UnlockScroll unlockScroll = new UnlockScroll(this);
+		unlockScroll = new UnlockScroll(this);
 		unlockScroll.registerUnlockScrollCraft();
-		new SpecialAnvil(this).registerSpecialAnvilCraft();
+		specialAnvil = new SpecialAnvil(this);
+		specialAnvil.registerSpecialAnvilCraft();
 		
 	    //Listeners
 		registerEvents(this, unenchanter, unlockScroll);
@@ -55,9 +46,16 @@ public class Main extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable()
 	{
-		Bukkit.getServer().clearRecipes();
-		for (Recipe r : recipesBackup)
-		    getServer().addRecipe(r);
+		Iterator<Recipe> serverRecipes = Bukkit.getServer().recipeIterator();
+		Recipe recipe;
+		while(serverRecipes.hasNext())
+		{
+			recipe = serverRecipes.next();
+			if(recipe != null && (recipe.getResult().equals(unlockScroll.getUnlockScroll()) || recipe.getResult().equals(specialAnvil.getSpecialAnvil())))
+			{
+				serverRecipes.remove();
+			}
+		}
 		plugin = null;
 	}
 	
