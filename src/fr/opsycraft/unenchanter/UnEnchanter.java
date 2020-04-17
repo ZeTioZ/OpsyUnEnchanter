@@ -873,7 +873,7 @@ public class UnEnchanter implements Listener
 		{
 			IndividualInterface playerInterface = playersInterfaces.get(p);
 			int catalyzerLevel = playerInterface.getCatalyzerLevel();
-			String catalyzerLevelString = new String();
+			String catalyzerLevelString = "";
 			if(catalyzerLevel >= 1 && catalyzerLevel < 4)
 			{
 				catalyzerLevel += 1;
@@ -906,7 +906,7 @@ public class UnEnchanter implements Listener
 		{
 			IndividualInterface playerInterface = playersInterfaces.get(p);
 			int catalyzerLevel = playerInterface.getCatalyzerLevel();
-			String catalyzerLevelString = new String();
+			String catalyzerLevelString = "";
 			if(catalyzerLevel >= 2 && catalyzerLevel <= 4)
 			{
 				catalyzerLevel -= 1;
