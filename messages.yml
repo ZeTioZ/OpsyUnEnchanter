@@ -30,8 +30,8 @@ errors:
     - "&cYou can't place this anvil on gravel, sand or plant. It's too heavy for it!"
   cant-break-under-block:
     - "&cYou can't break a block under a special anvil!"
-  locked-weapon:
-    - "&cYour weapon is locked! You can't unenchant it more!"
+  locked-item:
+    - "&cYour item is locked! You can't unenchant or enchant it more!"
     - "&cTo unlock the weapon use an &2\"&eUnlocking Scroll&2\"!"
   no-enchants-to-recover:
     - "&cNo enchantments to recovers from this item!"

@@ -39,7 +39,7 @@ public class Main extends JavaPlugin implements Listener {
 		specialAnvil.registerSpecialAnvilCraft();
 		
 	    //Listeners
-		registerEvents(this, unenchanter, unlockScroll);
+		registerEvents(this, unenchanter, unlockScroll, new UnEnchanterEnchantBlocker(this));
 		getCommand("desenchant").setExecutor(new UnEnchanterCommands(this));
 	}
 	

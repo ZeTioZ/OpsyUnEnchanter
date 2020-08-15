@@ -180,7 +180,7 @@ public class UnEnchanter implements Listener
 							}
 							if(!hasUnlockScroll)
 							{
-								for(String line : messagesFile.getStringList("errors.locked-weapon"))
+								for(String line : messagesFile.getStringList("errors.locked-item"))
 								{
 									e.getPlayer().sendMessage(prefix + ChatColor.translateAlternateColorCodes('&', line));
 								}
