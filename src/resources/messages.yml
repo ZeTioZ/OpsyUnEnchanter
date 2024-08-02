@@ -1,14 +1,12 @@
 ## -- When you see a '- "TEXT"' format, it means that's a list! -- ##
-## -- Please, use that format to add/remove a line from the message! -- ##
+## -- Please use that format to add/remove a line from the message! -- ##
 
-## -- To print a " in the messages, be sure to escape it with \ before it, -- #
+## -- To print a double quotes in a message, be sure to escape it with \ before it, -- #
 ## -- Or replace the double quotes by simple quotes like so: 'My text "1"'. -- ##
 
 ## -- Placeholders are not supported. The only placeholders supported are those already in the messages. -- ##
 
 prefix: "&2[&aUnEnchanter&2] "
-
-## -- It would be ridiculous to modify that but do what you want -- ##
 
 help:
   - "&d/ds &c» &2show infos about the plugin"
